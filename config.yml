@@ -1,0 +1,13 @@
+REDMINE:
+  URL: 'http://redmine.com'
+  OWNER_NAME: ''
+  USER_TOKEN: ''
+  EXPORT_BASE_DIR: './issues'
+  ATTACHMENTS_DIR: './attachments'
+YONA: 
+  DO_EXPORT: false
+  URL: 'http://yona.com'
+  USER_TOKEN: ''
+  OWNER_NAME: 'admin'
+  PROJECT_NAME: ''
+  ROOT_CONTEXT: ''
