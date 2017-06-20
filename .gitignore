@@ -1,0 +1,6 @@
+*.bk
+__pycache__
+.cache
+*.sublime-*
+*.pyc
+config.yml
