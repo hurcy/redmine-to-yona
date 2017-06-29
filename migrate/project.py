@@ -37,6 +37,20 @@ class Project(object):
         self.dump_info['projectDescription'] = project_info.description
 
 
+    def pull_authors(self, author):
+        author_info = self.user_dict[author.name]
+        if not author_info in self.dump_info['authors']:
+            self.dump_info['authors'].append(author_info)
+        return author_info
+
+
+    def pull_assignee(self, assignee):
+        assignee_info = self.user_dict[assignee.name]
+        if not assignee_info in self.dump_info['assignees']:
+            self.dump_info['assignees'].append(assignee_info)
+        return assignee_info
+
+
     def pull_issues(self):
         issues = self.redmine.issue.filter(
             project_id=self.prj_id,
@@ -57,8 +71,8 @@ class Project(object):
             issue['id'] = each_issue.id
             issue['title'] = each_issue.subject
             issue['body'] = each_issue.description
-            issue['author'] = self.user_dict[each_issue.author.name]
-            issue['assignee'] = self.user_dict[each_issue.assigned_to.name]
+            issue['author'] = self.pull_authors(each_issue.author)
+            issue['assignee'] = self.pull_authors(each_issue.assigned_to)
             issue['createdAt'] = each_issue.created_on
             issue['updatedAt'] = each_issue.updated_on
 
