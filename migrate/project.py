@@ -29,6 +29,7 @@ class Project(object):
 
     def dump_all(self):
         self.pull_project_info()
+        self.pull_versions()
         self.pull_issues()
 
 
@@ -66,7 +67,6 @@ class Project(object):
         # u'tracker', u'updated_on', u'watchers']
         #
         for each_issue in issues:
-
             issue = dict()
             issue['number'] = each_issue.id
             issue['id'] = each_issue.id
@@ -82,4 +82,24 @@ class Project(object):
 
             self.dump_info['issueCount'] += 1
             self.dump_info['issues'].append(issue)
+
+
+    def pull_versions(self):
+        convert_dict = {
+            'id':'id',
+            'name':'title',
+            'status':'state',
+            'description':'description',
+            'due_date':'due_on'
+        }
+        versions = self.redmine.version.filter(project_id=self.prj_id)
+        for each_version in versions:
+            version = dict()
+            for idx in convert_dict:
+                each_item = dict(each_version).get(idx, False)
+                version[convert_dict[idx]] = each_item if each_item else None
+
+            self.dump_info['milestoneCount'] +=1
+            self.dump_info['milestones'].append(version)
+
 
