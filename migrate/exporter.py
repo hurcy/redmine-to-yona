@@ -7,16 +7,16 @@ from redminelib.resources import *
 from project import Project
 
 class Exporter(object):
-
+    config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'config.yml')
     def __init__(self):
         self.m_config = dict()
-        with open("config.yml") as stream:
+        with open(Exporter.config_file) as stream:
             try:
-                m_config = yaml.load(stream)
+                self.m_config = yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
 
-        self.redmine = Redmine(m_config['REDMINE']['URL'], key=m_config['REDMINE']['USER_TOKEN'])
+        self.redmine = Redmine(self.m_config['REDMINE']['URL'], key=self.m_config['REDMINE']['USER_TOKEN'])
 
 
     def dump_users(self, offset=0):
@@ -39,7 +39,29 @@ class Exporter(object):
             status_dict[each.name] = convert_state(dict(each).get('is_closed', False))
         return status_dict
 
+    def dump_attachment(self, issue):
+        savepath = "%s/%s" % (self.m_config['REDMINE']['ATTACHMENTS_DIR'], issue.id)
+        if not os.path.exists(savepath):
+            os.mkdir(savepath)
+ 
+        prop = 'attachments'
+        if prop in dir(issue):
+            attachments = issue[prop]
+            for each in attachments:
+                each.download(
+                 savepath=savepath,
+                 filename=str(each))
 
+    def pull_attachments(self, prj_id):
+        issues = self.redmine.issue.filter(
+                project_id=prj_id,
+                status_id='*',
+                subproject_id='!*',
+                sort='id:asc'
+                )
+        for each_issue in issues:
+            self.dump_attachment(each_issue)
+ 
     def pull_projects(self):
         projects = self.redmine.project.all(offset=0, limit=100)
         ids = list()
