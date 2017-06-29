@@ -25,6 +25,8 @@ class Project(object):
         self.status_dict = status_dict
         self.prj_id = prj_id
 
+        print "Start: ", prj_id
+
 
     def dump_all(self):
         self.pull_project_info()
@@ -35,6 +37,20 @@ class Project(object):
         project_info = self.redmine.project.get(self.prj_id)
         self.dump_info['projectName'] = project_info.name
         self.dump_info['projectDescription'] = project_info.description
+
+
+    def pull_author(self, author):
+        author_info = self.user_dict[author.name]
+        if not author_info in self.dump_info['authors']:
+            self.dump_info['authors'].append(author_info)
+        return author_info
+
+
+    def pull_assignee(self, assignee):
+        assignee_info = self.user_dict[assignee.name]
+        if not assignee_info in self.dump_info['assignees']:
+            self.dump_info['assignees'].append(assignee_info)
+        return assignee_info
 
 
     def pull_issues(self):
@@ -57,11 +73,14 @@ class Project(object):
             issue['id'] = each_issue.id
             issue['title'] = each_issue.subject
             issue['body'] = each_issue.description
-            issue['author'] = self.user_dict[each_issue.author.name]
-            issue['assignee'] = self.user_dict[each_issue.assigned_to.name]
+            issue['author'] = self.pull_author(each_issue.author)
+            if dict(each_issue).get('assigned_to', None):
+                issue['assignee'] = self.pull_assignee(each_issue.assigned_to)
+            else:
+                issue['assignee'] = []
             issue['createdAt'] = each_issue.created_on
             issue['updatedAt'] = each_issue.updated_on
 
-            self.issueCount += 1
-            self.issues.append(issue)
+            self.dump_info['issueCount'] += 1
+            self.dump_info['issues'].append(issue)
 
