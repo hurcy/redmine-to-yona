@@ -3,10 +3,11 @@ from redminelib.resources import *
 
 class Project(object):
 
-    def __init__(self, redmine, user_dict, status_dict, prj_id):
+    def __init__(self, redmine, user_dict, status_dict, role_dict, prj_id):
         self.redmine = redmine
         self.user_dict = user_dict
         self.status_dict = status_dict
+        self.role_dict = role_dict
         self.prj_id = prj_id
         self.dump_info = {
             "owner": None,
@@ -31,6 +32,8 @@ class Project(object):
         self.pull_project_info()
         self.pull_versions()
         self.pull_issues()
+        self.pull_members()
+        return self.dump_info
 
 
     def pull_project_info(self):
@@ -51,6 +54,19 @@ class Project(object):
         if not assignee_info in self.dump_info['assignees']:
             self.dump_info['assignees'].append(assignee_info)
         return assignee_info
+
+
+    def pull_members(self):
+        memberships = self.redmine.project_membership.filter(project_id=self.prj_id)
+        for each_membership in memberships:
+            membership = self.user_dict[each_membership.user.name]
+            role_idx = 99
+            for each_role in each_membership.roles:
+                role_idx = self.role_dict[each_role.name] if self.role_dict[each_role.name] < role_idx else role_idx
+            membership['role'] = 'manager' if role_idx == 1 else 'member'
+
+            self.dump_info['members'].append(membership)
+            self.dump_info['memberCount'] += 1
 
 
     def pull_issues(self):

@@ -12,11 +12,11 @@ class Exporter(object):
         self.m_config = dict()
         with open("config.yml") as stream:
             try:
-                m_config = yaml.load(stream)
+                self.m_config = yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
 
-        self.redmine = Redmine(m_config['REDMINE']['URL'], key=m_config['REDMINE']['USER_TOKEN'])
+        self.redmine = Redmine(self.m_config['REDMINE']['URL'], key=self.m_config['REDMINE']['USER_TOKEN'])
 
 
     def dump_users(self, offset=0):
@@ -40,21 +40,32 @@ class Exporter(object):
         return status_dict
 
 
+    def dump_roles(self):
+        role_dict = dict()
+        roles = self.redmine.role.all()
+        for each in roles:
+            if each.name in self.m_config['REDMINE']['PROJECT_ADMIN']:
+                role_dict[each.name] = 1 #'manager'
+            else:
+                role_dict[each.name] = 2 #'member'
+        return role_dict
+
     def pull_projects(self):
         projects = self.redmine.project.all(offset=0, limit=100)
         ids = list()
         for project in projects:
             ids.append(project.identifier)
-        # print ids, len(ids)
         return ids
 
 
     def runner(self):
         user_dict = self.dump_users(offset=1)
         status_dict = self.dump_status()
+        role_dict = self.dump_roles()
+
         project_list = self.pull_projects()
 
         for each_project in project_list:
-            project = Project(self.redmine, user_dict, status_dict, each_project)
+            project = Project(self.redmine, user_dict, status_dict, role_dict, each_project)
             output = project.dump_all()
 

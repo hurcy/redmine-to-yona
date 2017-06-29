@@ -4,6 +4,7 @@ REDMINE:
   USER_TOKEN: ''
   EXPORT_BASE_DIR: './issues'
   ATTACHMENTS_DIR: './attachments'
+  PROJECT_ADMIN: ['관리자']
 YONA: 
   DO_EXPORT: false
   URL: 'http://yona.com'
