@@ -1,90 +1,67 @@
 #-*- coding: utf-8 -*-
-import yaml
-import os
-from redminelib import Redmine
-import requests
 from redminelib.resources import *
 
+class Project(object):
 
-m_config = dict()
-with open("config.yml") as stream:
-    try:
-        m_config = yaml.load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
-print m_config
-
-redmine = Redmine(m_config['REDMINE']['URL'],
-                  key=m_config['REDMINE']['USER_TOKEN'])
-
-def pull_projects():
-    projects = redmine.project.all(offset=0, limit=100)
-    ids = list()
-    for project in projects:
-        ids.append(project.identifier)
-    print ids, len(ids)
-
-    # project = redmine.project.get(ids[0])
-    # for issue in project.issues:
-    #     print issue
-    #     print  dir(issue)
-
-
-def dump_issue(issue):
-    # print issue.id
-    savepath = "%s/%s" % (m_config['REDMINE']['ATTACHMENTS_DIR'], issue.id)
-    if not os.path.exists(savepath):
-        os.mkdir(savepath)
-    print dir(issue)
-
-    for prop in dir(issue):
-        if isinstance(issue[prop], unicode):
-            print '\t', prop, issue[prop].encode('utf-8')
-        elif prop == 'attachments':
-            issue[prop][0].download(
-                savepath=savepath, filename=str(issue[prop][0]))
-        else:
-            print prop, issue[prop]
-
-
-def pull_issues(prj_id):
-    issues = redmine.issue.filter(
-        project_id=prj_id,
-        status_id='*',
-        # subproject_id='!*',
-        # created_on='><2012-03-01|2012-03-07',
-        # cf_22='~foo',
-        sort='category:desc'
-    )
-    # [u'attachments', u'author', u'changesets', u'children',
-    # u'created_on', u'description', u'done_ratio', u'id',
-    # u'journals', u'priority', u'project', u'relations',
-    # u'start_date', u'status', u'subject', u'time_entries',
-    # u'tracker', u'updated_on', u'watchers']
-    #
-    for issue in issues:
-        dump_issue(issue)
-        break
-    return issues
-
-
-def push_issue(prj, issue):
-    print '---------------------------'
-    url = m_config['YONA']['URL'] + \
-    m_config['YONA']['ROOT_CONTEXT'] + \
-    '/-_-api/v1/owners/hcinyoung/projects/DummyPrj/issues'
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Yona-Token': m_config['YONA']['USER_TOKEN']
+    dump_info = {
+        "owner": None,
+        "projectName": None,
+        "projectDescription": None,
+        "assignees": [], # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
+        "authors": [], # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
+        "memberCount": 0,
+        "members": [], # members 는 해당 프로젝트의 현재 멤버
+        "issueCount": 0,
+        "issues": [],
+        "postCount": 0,
+        "posts": [],
+        "milestoneCount": 0,
+        "milestones": []
     }
-    data = {
-        'id': issue.id,
-        'title': issue.subject,
-        'body': issue.description,
-        'created': issue.start_date
-    }
-    print url
-    r = requests.post(url, headers=headers, data=data)
-    print r.status_code
-    # print len(issues)
+
+    def __init__(self, redmine, user_dict, status_dict, prj_id):
+        self.redmine = redmine
+        self.user_dict = user_dict
+        self.status_dict = status_dict
+        self.prj_id = prj_id
+
+
+    def dump_all(self):
+        self.pull_project_info()
+        self.pull_issues()
+
+
+    def pull_project_info(self):
+        project_info = self.redmine.project.get(self.prj_id)
+        self.dump_info['projectName'] = project_info.name
+        self.dump_info['projectDescription'] = project_info.description
+
+
+    def pull_issues(self):
+        issues = self.redmine.issue.filter(
+            project_id=self.prj_id,
+            status_id='*',
+            subproject_id='!*',
+            sort='id:asc'
+        )
+        # [u'attachments', u'author', u'changesets', u'children',
+        # u'created_on', u'description', u'done_ratio', u'id',
+        # u'journals', u'priority', u'project', u'relations',
+        # u'start_date', u'status', u'subject', u'time_entries',
+        # u'tracker', u'updated_on', u'watchers']
+        #
+        for each_issue in issues:
+
+            issue = dict()
+            issue['number'] = each_issue.id
+            issue['id'] = each_issue.id
+            issue['title'] = each_issue.subject
+            issue['body'] = each_issue.description
+            issue['author'] = self.user_dict[each_issue.author.name]
+            issue['assignee'] = self.user_dict[each_issue.assigned_to.name]
+            issue['createdAt'] = each_issue.created_on
+            issue['updatedAt'] = each_issue.updated_on
+
+            self.issueCount += 1
+            self.issues.append(issue)
+
