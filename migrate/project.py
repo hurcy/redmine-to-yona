@@ -3,27 +3,26 @@ from redminelib.resources import *
 
 class Project(object):
 
-    dump_info = {
-        "owner": None,
-        "projectName": None,
-        "projectDescription": None,
-        "assignees": [], # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
-        "authors": [], # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
-        "memberCount": 0,
-        "members": [], # members 는 해당 프로젝트의 현재 멤버
-        "issueCount": 0,
-        "issues": [],
-        "postCount": 0,
-        "posts": [],
-        "milestoneCount": 0,
-        "milestones": []
-    }
-
     def __init__(self, redmine, user_dict, status_dict, prj_id):
         self.redmine = redmine
         self.user_dict = user_dict
         self.status_dict = status_dict
         self.prj_id = prj_id
+        self.dump_info = {
+            "owner": None,
+            "projectName": None,
+            "projectDescription": None,
+            "assignees": [], # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
+            "authors": [], # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
+            "memberCount": 0,
+            "members": [], # members 는 해당 프로젝트의 현재 멤버
+            "issueCount": 0,
+            "issues": [],
+            "postCount": 0,
+            "posts": [],
+            "milestoneCount": 0,
+            "milestones": []
+        }
 
         print "Start: ", prj_id
 
