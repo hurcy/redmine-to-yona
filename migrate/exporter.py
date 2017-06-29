@@ -25,7 +25,7 @@ class Exporter(object):
         for each_user in users:
             each_info = dict()
             each_info['name'] = each_user.firstname + ' ' + each_user.lastname
-            each_info['login_id'] = each_user.login
+            each_info['loginId'] = each_user.login
             each_info['email'] = each_user.mail
             user_dict[each_user.firstname + ' ' + each_user.lastname] = each_info
         return user_dict
