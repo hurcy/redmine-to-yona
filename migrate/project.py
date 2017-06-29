@@ -52,6 +52,8 @@ class Project(object):
             self.dump_info['assignees'].append(assignee_info)
         return assignee_info
 
+    def pull_attachements(self, issue_id):
+        pass
 
     def pull_issues(self):
         issues = self.redmine.issue.filter(
@@ -80,7 +82,8 @@ class Project(object):
                 issue['assignee'] = []
             issue['createdAt'] = each_issue.created_on
             issue['updatedAt'] = each_issue.updated_on
-
+            # @hurcy, 첨부파일 당겨와서 yona 이슈의 첨부파일로 매핑
+            #issue['attachements'] = self.pull_attachments(each_issue_id) 
             self.dump_info['issueCount'] += 1
             self.dump_info['issues'].append(issue)
 
