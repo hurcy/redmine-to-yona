@@ -23,7 +23,6 @@ class Exporter(object):
         user_dict = dict()
         users = self.redmine.user.all(offset=offset)
         for each_user in users:
-            print each_user
             each_info = dict()
             each_info['name'] = each_user.firstname + ' ' + each_user.lastname
             each_info['login_id'] = each_user.login
