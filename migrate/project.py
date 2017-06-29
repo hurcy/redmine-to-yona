@@ -3,33 +3,33 @@ from redminelib.resources import *
 
 class Project(object):
 
-    dump_info = {
-        "owner": None,
-        "projectName": None,
-        "projectDescription": None,
-        "assignees": [], # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
-        "authors": [], # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
-        "memberCount": 0,
-        "members": [], # members 는 해당 프로젝트의 현재 멤버
-        "issueCount": 0,
-        "issues": [],
-        "postCount": 0,
-        "posts": [],
-        "milestoneCount": 0,
-        "milestones": []
-    }
-
     def __init__(self, redmine, user_dict, status_dict, prj_id):
         self.redmine = redmine
         self.user_dict = user_dict
         self.status_dict = status_dict
         self.prj_id = prj_id
+        self.dump_info = {
+            "owner": None,
+            "projectName": None,
+            "projectDescription": None,
+            "assignees": [], # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
+            "authors": [], # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
+            "memberCount": 0,
+            "members": [], # members 는 해당 프로젝트의 현재 멤버
+            "issueCount": 0,
+            "issues": [],
+            "postCount": 0,
+            "posts": [],
+            "milestoneCount": 0,
+            "milestones": []
+        }
 
         print "Start: ", prj_id
 
 
     def dump_all(self):
         self.pull_project_info()
+        self.pull_versions()
         self.pull_issues()
 
 
@@ -67,7 +67,6 @@ class Project(object):
         # u'tracker', u'updated_on', u'watchers']
         #
         for each_issue in issues:
-
             issue = dict()
             issue['number'] = each_issue.id
             issue['id'] = each_issue.id
@@ -83,4 +82,24 @@ class Project(object):
 
             self.dump_info['issueCount'] += 1
             self.dump_info['issues'].append(issue)
+
+
+    def pull_versions(self):
+        convert_dict = {
+            'id':'id',
+            'name':'title',
+            'status':'state',
+            'description':'description',
+            'due_date':'due_on'
+        }
+        versions = self.redmine.version.filter(project_id=self.prj_id)
+        for each_version in versions:
+            version = dict()
+            for idx in convert_dict:
+                each_item = dict(each_version).get(idx, False)
+                version[convert_dict[idx]] = each_item if each_item else None
+
+            self.dump_info['milestoneCount'] +=1
+            self.dump_info['milestones'].append(version)
+
 
