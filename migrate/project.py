@@ -1,21 +1,21 @@
 #-*- coding: utf-8 -*-
-from redminelib.resources import *
-import os
-from util import *
+import urllib2, xmltodict, re, os
 
+from redminelib.resources import *
+from util import *
 
 class Project(object):
 
-
-    def __init__(self, redmine, attachment_base_dir, user_dict, status_dict, prj_id):
+    def __init__(self, redmine, attachment_base_dir, user_dict, status_dict, role_dict, prj_id, m_config):
         self.redmine = redmine
         self.user_dict = user_dict
         self.status_dict = status_dict
         self.role_dict = role_dict
         self.prj_id = prj_id
+        self.m_config = m_config
         self.attachment_base_dir = attachment_base_dir
         self.dump_info = {
-            "owner": None,
+            "owner": self.m_config['YONA']['OWNER_NAME'],
             "projectName": None,
             "projectDescription": None,
             "assignees": [],  # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
@@ -38,6 +38,9 @@ class Project(object):
         self.pull_issues()
         self.pull_members()
         return self.dump_info
+
+    def init_project_info(self, projectName):
+        self.dump_info['projectName'] = projectName
 
     def pull_project_info(self):
         project_info = self.redmine.project.get(self.prj_id)
@@ -67,6 +70,48 @@ class Project(object):
 
             self.dump_info['members'].append(membership)
             self.dump_info['memberCount'] += 1
+
+    def pull_board_comment(self, parent_post_idx, entry):
+        comment = dict()
+        comment['id'] = 1
+        comment['type'] = "NONISSUE_COMMENT"
+        comment['author'] = self.user_dict[entry['author']['name']]
+        comment['createdAt'] = entry['updated']
+        comment['body'] = entry['content']
+
+        for each_post in self.dump_info['posts']:
+            if each_post['id'] == parent_post_idx:
+                if 'comments' in each_post:
+                    for each_comment in each_post['comments']:
+                        comment['id'] = each_comment['id'] + 1
+                else:
+                    each_post['comments'] = []
+                each_post.append(comment)
+                break
+
+    def pull_board(self, board_idx):
+        comments_re = re.compile(self.m_config['REDMINE']['URL'].replace('/','\/')+'\/boards\/'+board_idx+'\/topics\/(\d+)\?r=\d+')
+
+        url = self.m_config['REDMINE']['URL']+'/projects/'+self.prj_id+'/boards/'+board_idx+'.atom?key='+self.m_config['REDMINE']['ATOM_TOKEN']
+        data = xmltodict.parse(urllib2.urlopen(url).read())
+
+        for each_entry in data['feed']['entry']:
+            parent_post_idx = comments_re.findall(each_entry['id'])
+            if parent_post_idx:
+                self.pull_board_comment(parent_post_idx, each_entry)
+            else:
+                post = dict()
+                post['number'] = each_entry['id'].split('/')[-1]
+                post['id'] = each_entry['id'].split('/')[-1]
+                post['title'] = each_entry['title']
+                post['type'] = 'BOARD_POST'
+                post['author'] = self.user_dict[each_entry['author']['name']]
+                post['createdAt'] = each_entry['updated']
+                post['updatedAt'] = each_entry['updated']
+                post['body'] = each_entry['content']
+
+                self.dump_info['posts'].append(post)
+                self.dump_info['postCount'] += 1
 
     def pull_issues(self):
         issues = self.redmine.issue.filter(
