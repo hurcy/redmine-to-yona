@@ -2,9 +2,11 @@ REDMINE:
   URL: 'http://redmine.com'
   OWNER_NAME: ''
   USER_TOKEN: ''
+  ATOM_TOKEN: ''
   EXPORT_BASE_DIR: './issues'
   ATTACHMENTS_DIR: './attachments'
   PROJECT_ADMIN: ['관리자']
+  BOARD_LIST: {}
 YONA: 
   DO_EXPORT: false
   URL: 'http://yona.com'

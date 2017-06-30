@@ -39,6 +39,7 @@ class Exporter(object):
             status_dict[each.name] = convert_state(dict(each).get('is_closed', False))
         return status_dict
 
+
     def dump_attachment(self, issue):
         savepath = "%s/%s" % (self.m_config['REDMINE']['ATTACHMENTS_DIR'], issue.id)
         if not os.path.exists(savepath):
@@ -89,8 +90,19 @@ class Exporter(object):
         role_dict = self.dump_roles()
 
         project_list = self.pull_projects()
+        dump_projects = {}
 
         for each_project in project_list:
-            project = Project(self.redmine, user_dict, status_dict, role_dict, each_project)
-            output = project.dump_all()
+            project = Project(self.redmine, user_dict, status_dict, role_dict, each_project, self.m_config)
+            dump_projects[each_project] = project
 
+        for each_project in self.m_config['REDMINE']['BOARD_LIST']:
+            for board_meta in self.m_config['REDMINE']['BOARD_LIST'][each_project]:
+                print board_meta
+                if board_meta[1] in dump_projects:
+                    dump_projects[board_meta[1]].dump_board(board_meta[0])
+                else:
+                    project = Project(self.redmine, user_dict, status_dict, role_dict, each_project, self.m_config)
+                    project.init_project_info(board_meta[1])
+                    project.dump_board(board_meta[0])
+                    dump_projects[board_meta[0]] = project
