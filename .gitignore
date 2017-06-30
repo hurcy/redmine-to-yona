@@ -4,3 +4,4 @@ __pycache__
 *.sublime-*
 *.pyc
 config.yml
+.idea/*
