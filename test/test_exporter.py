@@ -2,7 +2,10 @@
 
 from migrate.exporter import Exporter
 from migrate.project import Project
+from migrate.util import kprint
 import pytest
+
+skip = pytest.mark.skip
 
 @pytest.fixture
 def exporter():
@@ -17,11 +20,19 @@ def project(exporter):
 		exporter.pull_projects())
 	return project
 
+
 def test_pull_attachments(project):
     issue_id = '1401'
     issue = project.redmine.issue.get(issue_id)
-    project.pull_attachments(issue)
+    kprint (project.pull_attachments(issue))
+
 
 def test_pull_comments(project):
-    issue_id = '1255'
-    print project.pull_comments(issue_id)
+    issue_id = '1510'
+    kprint( project.pull_comments(issue_id))
+
+
+def test_download(project):
+	print 'download'
+	download = project.redmine.attachment.get(314)
+	print dir(download)
