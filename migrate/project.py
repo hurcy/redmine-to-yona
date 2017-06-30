@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from redminelib.resources import *
 import os
+from util import *
 
 
 class Project(object):
@@ -101,78 +102,67 @@ class Project(object):
             self.dump_info['milestoneCount'] += 1
             self.dump_info['milestones'].append(version)
 
-    def pull_attachments(self, issue):
-        savepath = "%s/%s" % (self.attachment_base_dir, issue.id)
+    def dump_attachment(self, savepath, attachment, parent):
+        filepath = os.path.join(savepath, attachment['filename'])
+        each = {
+            "id": attachment['id'],  # attachment id
+            "name": attachment['filename'],
+            "hash": get_filehash(filepath),
+            "containerType": "ISSUE_COMMENT",
+            "mimeType": attachment['content_type'],
+            "size": attachment['filesize'],
+            "containerId": parent.id,
+            "createdDate": unix_time_millis(attachment['created_on']),
+        }
+        if 'author' in dir(parent):
+            each['ownerLoginId'] = self.user_dict[
+                parent.author.name]['login_id']
+        elif 'user' in dir(parent):
+            each['ownerLoginId'] = self.user_dict[parent.user.name]['login_id']
+        return each
+
+    def pull_attachment(self, aid, parent):
+        savepath = "%s/%s" % (self.attachment_base_dir, aid)
         if not os.path.exists(savepath):
             os.mkdir(savepath)
+        attachment = self.redmine.attachment.get(aid)
+        attachment.download(savepath=savepath,
+                            filename=str(attachment))
+        each = self.dump_attachment(savepath, attachment, parent)
+        return each
 
-        prop = 'attachments'
-        if prop in dir(issue):
-            attachments = issue[prop]
-            for each in attachments:
-                each.download(
-                    savepath=savepath,
-                    filename=str(each))
-            return self.dump_attachments(attachments, issue)
-
-    def get_mimeType(self, attachment):
-        return "image/jpeg"
-
-    def get_filesize(self, attachment):
-        return 0
-    def get_filehash(self, attachment):
-        return "e3e501fe54a051bf747fd7d003779645714a9031"
-
-    def dump_attachments(self, issue_attachments, issue):
-        # under comments
-        # "attachments": [
-        #     {
-        #       "id": 274,
-        #       "name": "1.jpg",
-        #       "hash": "e3e501fe54a051bf747fd7d003779645714a9031",
-        #       "containerType": "ISSUE_COMMENT",
-        #       "mimeType": "image/jpeg",
-        #       "size": 51092,
-        #       "containerId": "109",
-        #       "createdDate": 1479140141000,
-        #       "ownerLoginId": "doortts"
-        #     }
-        #   ]
+    def pull_attachments(self, parent):
         attachments = list()
-        for a in issue_attachments:
-            each = {
-                "id": 274, # attachment id
-                "name": str(a),
-                "hash": self.get_filehash(a),
-                "containerType": "ISSUE_COMMENT",
-                "mimeType": self.get_mimeType(a),
-                "size": self.get_filesize(a),
-                "containerId": "109", # parent id
-                "createdDate": issue.created_on,
-                "ownerLoginId": issue.author
-              }
-            attachments.append(each)
-        return attachments
+        if isinstance(parent, standard.IssueJournal):
+            for each in parent['details']:
+                if each['property'] == 'attachment':
+                    attachments.append(
+                        self.pull_attachment(each['name'], parent))
+
+            return attachments
+        elif isinstance(parent, standard.Issue):
+            if 'attachments' in dir(parent):
+                for each in parent['attachments']:
+                    attachments.append(
+                        self.pull_attachment(each['id'], parent))
+            return attachments
+        else:
+            return None
 
     def dump_comments(self, journals):
-        # journals =
-        # created_on: 작성날짜
-        # details: 변경이력
-        # id: 식별자
-        # notes: 코멘트
-        # user: 작성자
         comments = list()
         for j in journals:
-            # save only comments
-            if 'notes' in dir(j):
-                each = {
-                    'id': j.id,
-                    'type': 'ISSUE_COMMENT',
-                    'authorId': j.user,
-                    'created_at': j.created_on,
-                    'body': j.notes.encode('utf-8')
-                }
-                comments.append(each)
+            each = dict()
+            each['id'] = j.id
+            each['type'] = 'ISSUE_COMMENT'
+            each['authorId'] = self.user_dict[j.user.name]['login_id']
+            each['authorName'] = self.user_dict[j.user.name]['name']
+            each['created_at'] = unix_time_millis(j.created_on)
+            each['body'] = j.notes.encode('utf-8')
+            attachments = self.pull_attachments(j)
+            if attachments:
+                each['attachments'] = attachments
+            comments.append(each)
         return comments
 
     def pull_comments(self, issue_id):
