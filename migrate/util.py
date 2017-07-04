@@ -26,6 +26,9 @@ def kprint(d):
 
 
 def unix_time_millis(dt):
+    if isinstance(dt,unicode) or isinstance(dt,str):
+        dt = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%SZ')
+
     return int((dt - epoch).total_seconds() * 1000)
 
 
@@ -36,3 +39,12 @@ def get_filehash(file_name):
         # pipe contents of the file through
         md5_returned = hashlib.md5(data).hexdigest()
         return md5_returned
+
+def get_mimeType(attachment):
+    if 'content_type' in dir(attachment):
+        return attachment['content_type']
+    else:
+        # TODO: map file mimetypes
+        return '*/*'
+
+print unix_time_millis('2017-06-29T03:08:49Z')

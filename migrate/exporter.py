@@ -19,7 +19,6 @@ class Exporter(object):
                 print(exc)
 
         self.redmine = Redmine(self.m_config['REDMINE']['URL'], key=self.m_config['REDMINE']['USER_TOKEN'])
-        self.attachment_base_dir = self.m_config['REDMINE']['ATTACHMENTS_DIR']
 
     def dump_users(self, offset=0):
         user_dict = dict()
@@ -59,7 +58,7 @@ class Exporter(object):
         return ids
 
     def runner(self):
-        user_dict = self.dump_users(offset=1)
+        user_dict = self.dump_users(offset=0)
         status_dict = self.dump_status()
         role_dict = self.dump_roles()
 
@@ -67,12 +66,12 @@ class Exporter(object):
         dump_projects = {}
 
         for each_project in project_list:
-            project = Project(self.redmine, self.attachment_base_dir, user_dict, status_dict, role_dict, each_project, self.m_config)
+            project = Project(self.redmine, user_dict, status_dict, role_dict, each_project, self.m_config)
+            project.dump_all()
             dump_projects[each_project] = project
 
         for each_project in self.m_config['REDMINE']['BOARD_LIST']:
             for board_meta in self.m_config['REDMINE']['BOARD_LIST'][each_project]:
-                print board_meta
                 if board_meta[1] in dump_projects:
                     dump_projects[board_meta[1]].pull_board(board_meta[0])
                 else:
@@ -80,3 +79,6 @@ class Exporter(object):
                     project.init_project_info(board_meta[1])
                     project.pull_board(board_meta[0])
                     dump_projects[board_meta[0]] = project
+
+        for each_project in dump_projects:
+            dump_projects[each_project].dump()

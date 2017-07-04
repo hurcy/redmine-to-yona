@@ -14,25 +14,34 @@ def exporter():
 @pytest.fixture
 def project(exporter):
 	project = Project(exporter.redmine,
-		exporter.attachment_base_dir,
 		exporter.dump_users(offset=1),
 		exporter.dump_status(), 
-		exporter.pull_projects())
+		exporter.dump_roles(),
+		'horai',
+		exporter.m_config
+		)
 	return project
 
 
 def test_pull_attachments(project):
-    issue_id = '1401'
+    issue_id = '1510'
     issue = project.redmine.issue.get(issue_id)
-    kprint (project.pull_attachments(issue))
+    # assert len (project.pull_attachments(issue))>0
 
 
 def test_pull_comments(project):
     issue_id = '1510'
-    kprint( project.pull_comments(issue_id))
+    # assert len( project.pull_comments(issue_id))>0
 
 
 def test_download(project):
-	print 'download'
 	download = project.redmine.attachment.get(314)
-	print dir(download)
+	assert download is not None
+
+
+def test_pull_issue(exporter):
+	issue = exporter.redmine.issue.get(1056)
+	# kprint(issue.description.encode('utf-8'))
+
+def test_dump(exporter):
+ 	exporter.runner()
