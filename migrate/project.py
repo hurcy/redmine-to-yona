@@ -6,6 +6,7 @@ from redminelib.exceptions import *
 from util import *       
 import json
 import sys  
+import io
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
@@ -278,5 +279,7 @@ class Project(object):
             os.mkdir(exportpath)
 
         exportfile = os.path.join(exportpath, '%s.json' % self.prj_id)
-        with open(exportfile, 'w') as outfile:
-            json.dump(self.dump_info, outfile, indent=4)
+        with io.open(exportfile, 'w', encoding='utf8') as outfile:
+            data = json.dumps(self.dump_info, indent=4, ensure_ascii=False)
+            # json.dump(self.dump_info, outfile, indent=4)
+            outfile.write(unicode(data))
