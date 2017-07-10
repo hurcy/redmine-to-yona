@@ -7,6 +7,7 @@ REDMINE:
   ATTACHMENTS_DIR: './attachments'
   PROJECT_ADMIN: ['관리자']
   BOARD_LIST: {}
+  ALTER_USERS: {}
 YONA: 
   DO_EXPORT: false
   URL: 'http://yona.com'

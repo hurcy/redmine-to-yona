@@ -1,12 +1,11 @@
 #-*- coding: utf-8 -*-
 
 import pprint
-import datetime
+import calendar
+from datetime import datetime, timedelta
 import hashlib
 import os
-
-epoch = datetime.datetime.utcfromtimestamp(0)
-
+from pytz import timezone
 
 class MyPrettyPrinter(pprint.PrettyPrinter):
 
@@ -25,11 +24,21 @@ def kprint(d):
     return MyPrettyPrinter().pformat(d)
 
 
-def unix_time_millis(dt):
-    if isinstance(dt,unicode) or isinstance(dt,str):
-        dt = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%SZ')
 
-    return int((dt - epoch).total_seconds() * 1000)
+
+def utc_to_local(utc_dt):
+    # get integer timestamp to avoid precision lost
+    timestamp = calendar.timegm(utc_dt.timetuple())
+    local_dt = datetime.fromtimestamp(timestamp)
+    assert utc_dt.resolution >= timedelta(microseconds=1)
+    return local_dt.replace(microsecond=utc_dt.microsecond)
+
+
+def yona_timeformat(dt):
+    if isinstance(dt,unicode) or isinstance(dt,str):
+        dt = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%SZ')
+
+    return dt.replace(tzinfo=timezone('Asia/Seoul')).strftime('%Y-%m-%d %p %H:%M:%S %z')
 
 
 def get_filehash(file_name):
@@ -47,4 +56,4 @@ def get_mimeType(attachment):
         # TODO: map file mimetypes
         return '*/*'
 
-print unix_time_millis('2017-06-29T03:08:49Z')
+print yona_timeformat(datetime.today())

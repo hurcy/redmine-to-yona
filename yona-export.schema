@@ -1,0 +1,283 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {},
+    "id": "http://example.com/example.json",
+    "properties": {
+        "assignees": {
+            "id": "/properties/assignees",
+            "items": {
+                "id": "/properties/assignees/items",
+                "properties": {
+                    "email": {
+                        "id": "/properties/assignees/items/properties/email",
+                        "type": "string"
+                    },
+                    "loginId": {
+                        "id": "/properties/assignees/items/properties/loginId",
+                        "type": "string"
+                    },
+                    "name": {
+                        "id": "/properties/assignees/items/properties/name",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "authors": {
+            "id": "/properties/authors",
+            "items": {
+                "id": "/properties/authors/items",
+                "properties": {
+                    "email": {
+                        "id": "/properties/authors/items/properties/email",
+                        "type": "string"
+                    },
+                    "loginId": {
+                        "id": "/properties/authors/items/properties/loginId",
+                        "type": "string"
+                    },
+                    "name": {
+                        "id": "/properties/authors/items/properties/name",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "issueCount": {
+            "id": "/properties/issueCount",
+            "type": "integer"
+        },
+        "issues": {
+            "id": "/properties/issues",
+            "items": {
+                "id": "/properties/issues/items",
+                "properties": {
+                    "author": {
+                        "id": "/properties/issues/items/properties/author",
+                        "properties": {
+                            "email": {
+                                "id": "/properties/issues/items/properties/author/properties/email",
+                                "type": "string"
+                            },
+                            "loginId": {
+                                "id": "/properties/issues/items/properties/author/properties/loginId",
+                                "type": "string"
+                            },
+                            "name": {
+                                "id": "/properties/issues/items/properties/author/properties/name",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "body": {
+                        "id": "/properties/issues/items/properties/body",
+                        "type": "string"
+                    },
+                    "comments": {
+                        "id": "/properties/issues/items/properties/comments",
+                        "items": {
+                            "id": "/properties/issues/items/properties/comments/items",
+                            "properties": {
+                                "attachments": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/attachments",
+                                    "items": {
+                                        "id": "/properties/issues/items/properties/comments/items/properties/attachments/items",
+                                        "properties": {
+                                            "containerId": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/containerId",
+                                                "type": "string"
+                                            },
+                                            "containerType": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/containerType",
+                                                "type": "string"
+                                            },
+                                            "createdDate": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/createdDate",
+                                                "type": "string"
+                                            },
+                                            "hash": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/hash",
+                                                "type": "string"
+                                            },
+                                            "id": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/id",
+                                                "type": "integer"
+                                            },
+                                            "mimeType": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/mimeType",
+                                                "type": "string"
+                                            },
+                                            "name": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/name",
+                                                "type": "string"
+                                            },
+                                            "ownerLoginId": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/ownerLoginId",
+                                                "type": "string"
+                                            },
+                                            "size": {
+                                                "id": "/properties/issues/items/properties/comments/items/properties/attachments/items/properties/size",
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "type": "array"
+                                },
+                                "author": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/author",
+                                    "properties": {
+                                        "email": {
+                                            "id": "/properties/issues/items/properties/comments/items/properties/author/properties/email",
+                                            "type": "string"
+                                        },
+                                        "loginId": {
+                                            "id": "/properties/issues/items/properties/comments/items/properties/author/properties/loginId",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "id": "/properties/issues/items/properties/comments/items/properties/author/properties/name",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "body": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/body",
+                                    "type": "string"
+                                },
+                                "createdAt": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/createdAt",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/id",
+                                    "type": "integer"
+                                },
+                                "type": {
+                                    "id": "/properties/issues/items/properties/comments/items/properties/type",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "createdAt": {
+                        "id": "/properties/issues/items/properties/createdAt",
+                        "type": "string"
+                    },
+                    "id": {
+                        "id": "/properties/issues/items/properties/id",
+                        "type": "integer"
+                    },
+                    "number": {
+                        "id": "/properties/issues/items/properties/number",
+                        "type": "integer"
+                    },
+                    "state": {
+                        "id": "/properties/issues/items/properties/state",
+                        "type": "string"
+                    },
+                    "title": {
+                        "id": "/properties/issues/items/properties/title",
+                        "type": "string"
+                    },
+                    "type": {
+                        "id": "/properties/issues/items/properties/type",
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "id": "/properties/issues/items/properties/updatedAt",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "labels": {
+            "id": "/properties/labels",
+            "items": {},
+            "type": "array"
+        },
+        "memberCount": {
+            "id": "/properties/memberCount",
+            "type": "integer"
+        },
+        "members": {
+            "id": "/properties/members",
+            "items": {
+                "id": "/properties/members/items",
+                "properties": {
+                    "email": {
+                        "id": "/properties/members/items/properties/email",
+                        "type": "string"
+                    },
+                    "loginId": {
+                        "id": "/properties/members/items/properties/loginId",
+                        "type": "string"
+                    },
+                    "name": {
+                        "id": "/properties/members/items/properties/name",
+                        "type": "string"
+                    },
+                    "role": {
+                        "id": "/properties/members/items/properties/role",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "milestoneCount": {
+            "id": "/properties/milestoneCount",
+            "type": "integer"
+        },
+        "milestones": {
+            "id": "/properties/milestones",
+            "items": {},
+            "type": "array"
+        },
+        "owner": {
+            "id": "/properties/owner",
+            "type": "string"
+        },
+        "postCount": {
+            "id": "/properties/postCount",
+            "type": "integer"
+        },
+        "posts": {
+            "id": "/properties/posts",
+            "items": {},
+            "type": "array"
+        },
+        "projectCreatedDate": {
+            "id": "/properties/projectCreatedDate",
+            "type": "string"
+        },
+        "projectDescription": {
+            "id": "/properties/projectDescription",
+            "type": "string"
+        },
+        "projectName": {
+            "id": "/properties/projectName",
+            "type": "string"
+        },
+        "projectScope": {
+            "id": "/properties/projectScope",
+            "type": "string"
+        },
+        "projectVcs": {
+            "id": "/properties/projectVcs",
+            "type": "string"
+        }
+    },
+    "type": "object"
+}

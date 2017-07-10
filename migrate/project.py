@@ -36,6 +36,7 @@ class Project(object):
             "milestoneCount": 0,
             "milestones": []
         }
+        self.alter_users = m_config['REDMINE']['ALTER_USERS']
 
         print "Start: ", prj_id
 
@@ -58,12 +59,9 @@ class Project(object):
         try:
             return self.user_dict[name]
         except KeyError:
-            if name == 'Heesoon Kim':
-                return self.user_dict['Kihoon Sung']
-            elif name == 'Redmine Linewalks':
-                return self.user_dict['Wonjun Hong']
-            elif name == 'Jinhang Choi':
-                return self.user_dict['Wonjun Hong']
+            for k, v in self.alter_users.iteritems():
+                if name == 'k':
+                    return self.user_dict[v]
 
     def pull_author(self, author):
         author_info = self._handle_user_dict(author.name)
@@ -96,7 +94,7 @@ class Project(object):
         comment['id'] = 1
         comment['type'] = "NONISSUE_COMMENT"
         comment['author'] = self._handle_user_dict(entry['author']['name'])
-        comment['createdAt'] = unix_time_millis(entry['updated'])
+        comment['createdAt'] = yona_timeformat(entry['updated'])
         comment['body'] = entry['content']
 
         for each_post in self.dump_info['posts']:
@@ -126,8 +124,8 @@ class Project(object):
                 post['title'] = each_entry['title'].encode('utf-8')
                 post['type'] = 'BOARD_POST'
                 post['author'] = self._handle_user_dict(each_entry['author']['name'])
-                post['createdAt'] = unix_time_millis(each_entry['updated'])
-                post['updatedAt'] = unix_time_millis(each_entry['updated'])
+                post['createdAt'] = yona_timeformat(each_entry['updated'])
+                post['updatedAt'] = yona_timeformat(each_entry['updated'])
                 post['body'] = each_entry['content']
 
                 self.dump_info['posts'].append(post)
@@ -166,8 +164,8 @@ class Project(object):
             issue['assignee'] = self.pull_assignee(each_issue.assigned_to)
         else:
             issue['assignee'] = []
-        issue['createdAt'] = unix_time_millis(each_issue.created_on)
-        issue['updatedAt'] = unix_time_millis(each_issue.updated_on)
+        issue['createdAt'] = yona_timeformat(each_issue.created_on)
+        issue['updatedAt'] = yona_timeformat(each_issue.updated_on)
         issue['attachments'] = self.pull_attachments(each_issue)
         issue['comments'] = self.pull_comments(each_issue.id)
         return issue
@@ -202,8 +200,8 @@ class Project(object):
         each["containerType"] = "ISSUE_COMMENT"
         each["mimeType"] = get_mimeType(attachment)
         each["size"] = attachment['filesize']
-        each["containerId"] = parent.id
-        each["createdDate"] = unix_time_millis(attachment['created_on'])
+        each["containerId"] = str(parent.id)
+        each["createdDate"] = yona_timeformat(attachment['created_on'])
         
         if 'author' in dir(parent):
             each['ownerLoginId'] = self._handle_user_dict(
@@ -256,7 +254,7 @@ class Project(object):
                 each['id'] = j.id
                 each['type'] = 'ISSUE_COMMENT'
                 each['author'] = self._handle_user_dict(j.user.name)
-                each['createdAt'] = unix_time_millis(j.created_on)
+                each['createdAt'] = yona_timeformat(j.created_on)
                 each['body'] = j.notes.encode('utf-8')
                 attachments = self.pull_attachments(j)
                 if attachments:
@@ -281,5 +279,7 @@ class Project(object):
         exportfile = os.path.join(exportpath, '%s.json' % self.prj_id)
         with io.open(exportfile, 'w', encoding='utf8') as outfile:
             data = json.dumps(self.dump_info, indent=4, ensure_ascii=False)
-            # json.dump(self.dump_info, outfile, indent=4)
             outfile.write(unicode(data))
+            # TODO: check json schema using jsonschema (yona-export.schema)
+            # from jsonschema import validate
+            # validate({"name" : "Eggs", "price" : 34.99}, schema)
