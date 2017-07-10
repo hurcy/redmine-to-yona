@@ -7,6 +7,7 @@ import hashlib
 import os
 from pytz import timezone
 
+
 class MyPrettyPrinter(pprint.PrettyPrinter):
 
     def format(self, _object, context, maxlevels, level):
@@ -24,8 +25,6 @@ def kprint(d):
     return MyPrettyPrinter().pformat(d)
 
 
-
-
 def utc_to_local(utc_dt):
     # get integer timestamp to avoid precision lost
     timestamp = calendar.timegm(utc_dt.timetuple())
@@ -35,7 +34,7 @@ def utc_to_local(utc_dt):
 
 
 def yona_timeformat(dt):
-    if isinstance(dt,unicode) or isinstance(dt,str):
+    if isinstance(dt, unicode) or isinstance(dt, str):
         dt = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%SZ')
 
     return dt.replace(tzinfo=timezone('Asia/Seoul')).strftime('%Y-%m-%d %p %H:%M:%S %z')
@@ -49,11 +48,10 @@ def get_filehash(file_name):
         md5_returned = hashlib.md5(data).hexdigest()
         return md5_returned
 
+
 def get_mimeType(attachment):
     if 'content_type' in dir(attachment):
         return attachment['content_type']
     else:
         # TODO: map file mimetypes
         return '*/*'
-
-print yona_timeformat(datetime.today())
