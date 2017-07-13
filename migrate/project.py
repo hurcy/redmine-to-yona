@@ -278,7 +278,8 @@ class Project(object):
                 attachments = self.pull_attachments(j)
                 if attachments:
                     each['attachments'] = attachments
-                comments.append(each)
+                if each['body'] != '': # only append something in body
+                    comments.append(each)
         return comments
 
     def pull_comments(self, issue_id):
