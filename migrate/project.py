@@ -163,7 +163,7 @@ class Project(object):
     def dump_issue(self, each_issue):
         print 'issue', each_issue.id
         issue = dict()
-        issue['number'] = self.dump_info['issueCount'] + 1
+        issue['number'] = each_issue.id
         issue['id'] = each_issue.id
         issue['title'] = each_issue.subject.encode('utf-8')
         issue['type'] = "ISSUE_POST"
