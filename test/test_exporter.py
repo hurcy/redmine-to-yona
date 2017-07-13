@@ -13,14 +13,14 @@ def exporter():
 
 @pytest.fixture
 def project(exporter):
-	project = Project(exporter.redmine,
-		exporter.dump_users(offset=1),
-		exporter.dump_status(), 
-		exporter.dump_roles(),
-		'horai',
-		exporter.m_config
-		)
-	return project
+    project = Project(exporter.redmine,
+        exporter.dump_users(offset=1),
+        exporter.dump_status(), 
+        exporter.dump_roles(),
+        'horai',
+        exporter.m_config
+        )
+    return project
 
 @skip
 def test_pull_attachments(project):
@@ -35,13 +35,20 @@ def test_pull_comments(project):
 
 @skip
 def test_download(project):
-	download = project.redmine.attachment.get(314)
-	assert download is not None
+    # http://redmine.linewalks.com/attachments/download/538/cost_per_category.png
+    issue_id = '1510'
+    issue = project.redmine.issue.get(issue_id)
+    attachements = project.pull_attachments(issue)
+    
+    # download = project.redmine.attachment.get(538)
+    # print download
+    assert attachements is not None
 
 @skip
 def test_pull_issue(exporter):
-	issue = exporter.redmine.issue.get(1056)
-	# kprint(issue.description.encode('utf-8'))
+    issue = exporter.redmine.issue.get(1056)
+    # kprint(issue.description.encode('utf-8'))
 
+# @skip
 def test_dump(exporter):
- 	exporter.runner()
+    exporter.runner()
