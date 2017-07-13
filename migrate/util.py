@@ -33,9 +33,12 @@ def utc_to_local(utc_dt):
     return local_dt.replace(microsecond=utc_dt.microsecond)
 
 
-def yona_timeformat(dt):
+def yona_timeformat(dt, fmt=None):
+    if fmt is None:
+        fmt = '%Y-%m-%dT%H:%M:%SZ'
+
     if isinstance(dt, unicode) or isinstance(dt, str):
-        dt = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%SZ')
+        dt = datetime.strptime(dt, fmt)
 
     return dt.replace(tzinfo=timezone('Asia/Seoul')).strftime('%Y-%m-%d %p %H:%M:%S %z')
 

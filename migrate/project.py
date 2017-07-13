@@ -34,9 +34,20 @@ class Project(object):
             "postCount": 0,
             "posts": [],
             "milestoneCount": 0,
-            "milestones": []
+            "milestones": [],
+            "labels": [],
         }
         self.alter_users = m_config['REDMINE']['ALTER_USERS']
+
+        exportpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+            '..', self.m_config['REDMINE']['EXPORT_BASE_DIR'], self.m_config['YONA']['OWNER_NAME'])
+        if not os.path.exists(exportpath):
+            os.mkdir(exportpath)
+
+        self.prjfilepath = os.path.join(exportpath, self.prj_id)
+        if not os.path.exists(self.prjfilepath):
+            os.mkdir(self.prjfilepath)
+        self.prjjson = os.path.join(exportpath, '%s.json' % self.prj_id)
 
         print "Start: ", prj_id
 
@@ -152,9 +163,10 @@ class Project(object):
     def dump_issue(self, each_issue):
         print 'issue', each_issue.id
         issue = dict()
-        issue['number'] = each_issue.id
+        issue['number'] = self.dump_info['issueCount'] + 1
         issue['id'] = each_issue.id
         issue['title'] = each_issue.subject.encode('utf-8')
+        issue['type'] = "ISSUE_POST"
         try:
             issue['body'] = each_issue.description.encode('utf-8')
         except ResourceAttrError:
@@ -176,7 +188,7 @@ class Project(object):
             'name': 'title',
             'status': 'state',
             'description': 'description',
-            'due_date': 'due_on'
+            'due_date': 'dueDate'
         }
         versions = self.redmine.version.filter(project_id=self.prj_id)
         for each_version in versions:
@@ -184,14 +196,21 @@ class Project(object):
             for idx in convert_dict:
                 each_item = dict(each_version).get(idx, False)
                 version[convert_dict[idx]] = each_item if each_item else None
+            if version['dueDate']:
+                version['dueDate'] = yona_timeformat(version['dueDate'], '%Y-%m-%d')
 
             self.dump_info['milestoneCount'] += 1
             self.dump_info['milestones'].append(version)
 
     def dump_attachment(self, savepath, attachment, parent):
+
+        attachmentpath = "%s/%s" % (savepath, attachment['id'])
+        if not os.path.exists(attachmentpath):
+            os.mkdir(attachmentpath)
+
         filename = attachment['filename'].encode('utf-8')
-        filepath = os.path.join(savepath, filename)
-        attachment.download(savepath=savepath,
+        filepath = os.path.join(attachmentpath, filename)
+        attachment.download(savepath=attachmentpath,
                             filename=filename)
         each = dict()
         each["id"] = attachment['id']  # attachment id
@@ -215,7 +234,7 @@ class Project(object):
         try:
             attachment = self.redmine.attachment.get(aid)
             
-            savepath = "%s/%s" % (self.attachment_base_dir, aid)
+            savepath = "%s/%s" % (self.prjfilepath, 'files')
             if not os.path.exists(savepath):
                 os.mkdir(savepath)
 
@@ -270,14 +289,7 @@ class Project(object):
             return self.dump_comments(journals)
 
     def dump(self):
-
-        exportpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-            '..', self.m_config['REDMINE']['EXPORT_BASE_DIR'])
-        if not os.path.exists(exportpath):
-            os.mkdir(exportpath)
-
-        exportfile = os.path.join(exportpath, '%s.json' % self.prj_id)
-        with io.open(exportfile, 'w', encoding='utf8') as outfile:
+        with io.open(self.prjjson, 'w', encoding='utf8') as outfile:
             data = json.dumps(self.dump_info, indent=4, ensure_ascii=False)
             outfile.write(unicode(data))
             # TODO: check json schema using jsonschema (yona-export.schema)
