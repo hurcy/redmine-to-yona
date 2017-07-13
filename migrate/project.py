@@ -256,11 +256,12 @@ class Project(object):
             if 'attachments' in dir(parent):
                 for each in parent['attachments']:
                     try:
-                        el = self.pull_attachment(each['name'], parent)
+                        el = self.pull_attachment(each['id'], parent)
                         if el:
                             attachments.append(el)
                     except ResourceAttrError:
-                        print 'attachment is not found'
+                        print '%s attachment is not found' % each
+                        print dir(each)
             return attachments
         else:
             return None
