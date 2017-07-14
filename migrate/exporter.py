@@ -62,23 +62,34 @@ class Exporter(object):
         status_dict = self.dump_status()
         role_dict = self.dump_roles()
 
-        project_list = self.pull_projects()
+        project_list = []#self.pull_projects()
         dump_projects = {}
 
         for each_project in project_list:
             project = Project(self.redmine, user_dict, status_dict, role_dict, each_project, self.m_config)
-            project.dump_all()
+            project.pull_all()
             dump_projects[each_project] = project
-
-        for each_project in self.m_config['REDMINE']['BOARD_LIST']:
-            for board_meta in self.m_config['REDMINE']['BOARD_LIST'][each_project]:
-                if board_meta[1] in dump_projects:
-                    dump_projects[board_meta[1]].pull_board(board_meta[0])
-                else:
-                    project = Project(self.redmine, user_dict, status_dict, role_dict, each_project, self.m_config)
-                    project.init_project_info(board_meta[1])
-                    project.pull_board(board_meta[0])
-                    dump_projects[board_meta[0]] = project
 
         for each_project in dump_projects:
             dump_projects[each_project].dump()
+        
+        board_list = self.m_config['REDMINE']['BOARD_LIST']
+        dump_boards = {}
+        for each_project in board_list:
+            for board_meta in self.m_config['REDMINE']['BOARD_LIST'][each_project]:
+                board_id, board_name = board_meta[0], board_meta[1]
+                if board_name not in dump_boards and board_name == each_project:
+                    project = Project(self.redmine, user_dict, status_dict, role_dict, board_name, self.m_config)
+                    project.init_project_info(each_project)
+                    project.pull_members()
+                    dump_boards[board_name] = project
+
+                elif board_name != each_project:
+                    project = Project(self.redmine, user_dict, status_dict, role_dict, board_name, self.m_config)
+                    project.init_project_info(board_name)
+                    dump_boards[board_name] = project
+                project.pull_board(board_id, each_project)
+        
+        for each_board in dump_boards:
+            dump_boards[each_board].dump()
+        

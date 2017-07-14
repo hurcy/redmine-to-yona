@@ -25,6 +25,8 @@ class Project(object):
             "owner": self.m_config['YONA']['OWNER_NAME'],
             "projectName": None,
             "projectDescription": None,
+            "projectVcs": 'GIT',
+            "projectScope": "PRIVATE",
             "assignees": [],  # 프로젝트 기준으로 이슈에 한 번이라도 담당자가 된적이 있는 사람들
             "authors": [],  # 이슈나 게시글을 한 번이라도 작성했던 적이 있는 사람
             "memberCount": 0,
@@ -51,7 +53,7 @@ class Project(object):
 
         print "Start: ", prj_id
 
-    def dump_all(self):
+    def pull_all(self):
         self.pull_project_info()
         self.pull_versions()
         self.pull_issues()
@@ -118,10 +120,10 @@ class Project(object):
                 each_post.append(comment)
                 break
 
-    def pull_board(self, board_idx):
+    def pull_board(self, board_idx, board_name):
         comments_re = re.compile(self.m_config['REDMINE']['URL'].replace('/','\/')+'\/boards\/'+board_idx+'\/topics\/(\d+)\?r=\d+')
 
-        url = self.m_config['REDMINE']['URL']+'/projects/'+self.prj_id+'/boards/'+board_idx+'.atom?key='+self.m_config['REDMINE']['ATOM_TOKEN']
+        url = self.m_config['REDMINE']['URL']+'/projects/'+board_name+'/boards/'+board_idx+'.atom?key='+self.m_config['REDMINE']['ATOM_TOKEN']
         data = xmltodict.parse(urllib2.urlopen(url).read())
 
         for each_entry in data['feed']['entry']:
@@ -130,8 +132,9 @@ class Project(object):
                 self.pull_board_comment(parent_post_idx, each_entry)
             else:
                 post = dict()
-                post['number'] = each_entry['id'].split('/')[-1]
-                post['id'] = each_entry['id'].split('/')[-1]
+                post['number'] = int(each_entry['id'].split('/')[-1])
+                post['id'] = int(each_entry['id'].split('/')[-1])
+
                 post['title'] = each_entry['title'].encode('utf-8')
                 post['type'] = 'BOARD_POST'
                 post['author'] = self._handle_user_dict(each_entry['author']['name'])
