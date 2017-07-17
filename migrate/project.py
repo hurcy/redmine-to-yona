@@ -176,9 +176,10 @@ class Project(object):
             issue['body'] = ''
         issue['author'] = self.pull_author(each_issue.author)
         if dict(each_issue).get('assigned_to', None):
-            issue['assignee'] = self.pull_assignee(each_issue.assigned_to)
+            issue['assignees'] = self.pull_assignee(each_issue.assigned_to)
         else:
-            issue['assignee'] = []
+            issue['assignees'] = []
+        issue['state'] = 'CLOSED' if each_issue.status in ['완료', '해결', '보류'] else 'OPEN'
         issue['createdAt'] = yona_timeformat(each_issue.created_on)
         issue['updatedAt'] = yona_timeformat(each_issue.updated_on)
         issue['attachments'] = self.pull_attachments(each_issue)

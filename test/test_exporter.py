@@ -22,11 +22,14 @@ def project(exporter):
         )
     return project
 
-@skip
+# @skip
 def test_pull_attachments(project):
     issue_id = '1510'
     issue = project.redmine.issue.get(issue_id)
+    print dir(issue)#.is_private
+    print issue.status
     # assert len (project.pull_attachments(issue))>0
+    print project.dump_issue(issue)
 
 @skip
 def test_pull_comments(project):
@@ -49,6 +52,6 @@ def test_pull_issue(exporter):
     issue = exporter.redmine.issue.get(1056)
     # kprint(issue.description.encode('utf-8'))
 
-# @skip
+@skip
 def test_dump(exporter):
     exporter.runner()
