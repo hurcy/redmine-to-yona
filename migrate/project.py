@@ -7,6 +7,7 @@ from util import *
 import json
 import sys  
 import io
+from markdownify import markdownify as md
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
@@ -40,7 +41,6 @@ class Project(object):
             "labels": [],
         }
         self.alter_users = m_config['REDMINE']['ALTER_USERS']
-
         exportpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
             '..', self.m_config['REDMINE']['EXPORT_BASE_DIR'], self.m_config['YONA']['OWNER_NAME'])
         if not os.path.exists(exportpath):
@@ -140,7 +140,7 @@ class Project(object):
                 post['author'] = self._handle_user_dict(each_entry['author']['name'])
                 post['createdAt'] = yona_timeformat(each_entry['updated'])
                 post['updatedAt'] = yona_timeformat(each_entry['updated'])
-                post['body'] = each_entry['content']
+                post['body'] = md(each_entry['content']['#text'])
 
                 self.dump_info['posts'].append(post)
                 self.dump_info['postCount'] += 1
