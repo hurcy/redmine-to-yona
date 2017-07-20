@@ -62,7 +62,7 @@ class Exporter(object):
         status_dict = self.dump_status()
         role_dict = self.dump_roles()
 
-        project_list = []#self.pull_projects()
+        project_list = self.pull_projects()
         dump_projects = {}
 
         for each_project in project_list:
